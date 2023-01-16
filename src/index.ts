@@ -3,7 +3,8 @@ import * as dotenv from 'dotenv';
 import express = require('express');
 import { JwtPayload } from 'jsonwebtoken';
 import { usersRouter } from './routes/users_router';
-
+import { articlesRouter } from './routes/articles_router';
+import { commentsRouter } from './routes/comments_router';
 
 declare global
 {
@@ -56,7 +57,8 @@ app.use(function (req: express.Request, res: express.Response, next)
    */
 
 app.use('/api/users', usersRouter);
-
+app.use('/api/articles', articlesRouter);
+app.use('/api/comments', commentsRouter);
 
 // Bind express server on port 8080
 app.listen(port, () =>
