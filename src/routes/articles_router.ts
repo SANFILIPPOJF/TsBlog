@@ -1,10 +1,13 @@
 import express = require('express');
 import { ArticlesController } from '../controllers/articles_controller';
+import { authenticateJWT } from '../middleware/auth';
 
 export const articlesRouter = express.Router();
 
-const usersController = new ArticlesController();
+const articlesController = new ArticlesController();
 
-articlesRouter.post('/add', usersController.add)
-articlesRouter.put('/modify', usersController.modify)
-articlesRouter.delete('/delete', usersController.delete)
+articlesRouter.get('/', articlesController.getAllArticles)
+articlesRouter.get('/:id', articlesController.getById)
+articlesRouter.post('/', authenticateJWT, articlesController.postArticle)
+articlesRouter.put('/:id', authenticateJWT, articlesController.putArticle)
+articlesRouter.delete('/:id', authenticateJWT, articlesController.deleteArticle)

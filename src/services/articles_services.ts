@@ -1,6 +1,6 @@
 import { client } from "../client";
 
-export class articlesService{
+export class ArticlesService{
     async getArticles()
     {
         const data = await client.query('SELECT * FROM articles');
@@ -11,9 +11,9 @@ export class articlesService{
         return undefined
     }
 
-    async getArticleByID(name: string)
+    async getById(id: number)
     {
-        const data = await client.query('SELECT * FROM users WHERE name=$1', [name]);
+        const data = await client.query('SELECT * FROM articles WHERE id=$1', [id]);
         if(data.rowCount)
         {
             return data.rows[0];
@@ -21,9 +21,9 @@ export class articlesService{
         return undefined
     }
 
-    async addArticle(name: string, hash: string)
+    async addArticle(message: string, userId: number)
     {
-        const data = await client.query('INSERT INTO users (name,password) VALUES ($1,$2) RETURNING *', [name, hash]);
+        const data = await client.query('INSERT INTO articles (message,created_by) VALUES ($1,$2) RETURNING *', [message,userId]);
         if(data.rowCount)
         {
             return data.rows[0];
@@ -31,9 +31,9 @@ export class articlesService{
         return undefined
     }
 
-    async deleteArticle(name: string, hash: string)
+    async deleteArticle(id: number)
     {
-        const data = await client.query('INSERT INTO users (name,password) VALUES ($1,$2) RETURNING *', [name, hash]);
+        const data = await client.query('DELETE FROM articles WHERE id = $1', [id]);
         if(data.rowCount)
         {
             return data.rows[0];
@@ -41,9 +41,19 @@ export class articlesService{
         return undefined
     }
 
-    async modifyArticle(name: string, hash: string)
+    async modifyArticle(id: number, message: string)
     {
-        const data = await client.query('INSERT INTO users (name,password) VALUES ($1,$2) RETURNING *', [name, hash]);
+        const data = await client.query('UPDATE articles SET message = $2 WHERE id = $1', [id, message]);
+        if(data.rowCount)
+        {
+            return data.rows[0];
+        }
+        return undefined
+    }
+
+    async articleCreatedBy(id: number)
+    {
+        const data = await client.query('SELECT created_by FROM articles WHERE id=$1', [id]);
         if(data.rowCount)
         {
             return data.rows[0];

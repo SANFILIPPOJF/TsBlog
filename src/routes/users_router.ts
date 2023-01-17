@@ -6,4 +6,4 @@ export const usersRouter = express.Router();
 const usersController = new UsersController();
 
 usersRouter.post('/register', usersController.register)
-usersRouter.get('/login', usersController.login)
+usersRouter.post('/login', usersController.login)
