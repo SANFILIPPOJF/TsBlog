@@ -1,4 +1,5 @@
 import { JwtPayload } from "jsonwebtoken";
+import { EStatus } from "../constant/const";
 
 export interface RequestWithUserRole extends Request
 {
@@ -9,4 +10,10 @@ export interface RequestWithUserRole extends Request
 interface HeaderWithAuthorization extends Headers
 {
     authorization?: JwtPayload
+}
+
+export type TApiResponse = {
+    status: EStatus,
+    data: any,
+    message: string
 }

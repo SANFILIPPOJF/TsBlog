@@ -24,7 +24,6 @@ export class ArticlesController {
             res.status(500).json({ status: "fail", data: "Erreur serveur" })
         }
     }
-
     async getById(req: express.Request, res: express.Response){
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
@@ -52,7 +51,6 @@ export class ArticlesController {
             res.status(500).json({ status: "fail", data: "Erreur serveur" })
         }
     }
-
     async postArticle(req: express.Request, res: express.Response){
         const message = req.body.message;
         const userId=req.user?.userId;
@@ -79,21 +77,57 @@ export class ArticlesController {
             })
         }
     }
-    async putArticle(req: express.Request, res: express.Response){
+    async patchArticle(req: express.Request, res: express.Response){
         const articleId = parseInt(req.params.id);
         const message = req.body.message;
         const userId = req.user?.userId;
 
-        if (message.length == 0) {
-            res.status(412).json({
-                status: "fail", data: "Article vide"
-            })
-            return;
-        }
         if (isNaN(articleId)) {
             res.status(412).json({
                 status: "fail",
-                data: "Id article invalide"
+                message: "Id article non valide"
+            })
+            return;
+        }
+        const articleProperty = await articlesService.articleCreatedBy(articleId);
+        
+        if (userId!=articleProperty) {
+            res.status(401).json({
+                status: "fail",
+                message: "Article n'appartient pas à ce user"
+            })
+            return;
+        }
+        if (message.length == 0) {
+            res.status(412).json({
+                status: "fail",
+                message: "Article vide"
+            })
+            return;
+        }
+        
+        try {
+            const article = await articlesService.modifyArticle(articleId, message);
+            
+            res.status(202).json({
+                status: "success",
+                data: article
+            })
+        }
+    
+        catch (err) {
+            res.status(500).json({ status: "fail", data: "Erreur serveur" })
+        }
+    
+    }
+    async deleteArticle(req: express.Request, res: express.Response){
+        const articleId = parseInt(req.params.id);
+        const userId = req.user?.userId;
+
+        if (isNaN(articleId)) {
+            res.status(412).json({
+                status: "fail",
+                data: "Id article non valide"
             })
             return;
         }
@@ -107,16 +141,14 @@ export class ArticlesController {
         }
 
         try {
-            const article = await articlesService.addArticle(message, userId);
-            res.status(201).json({ status: "success", data: article })
+            const article = await articlesService.deleteArticle(userId);
+            res.status(202).json({
+                status: "success",
+                data: article
+            })
         }
-    
         catch (err) {
             res.status(500).json({ status: "fail", data: "Erreur serveur" })
         }
-    
-    }
-    deleteArticle(){
-        
     }
 }

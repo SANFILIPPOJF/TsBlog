@@ -9,5 +9,5 @@ const articlesController = new ArticlesController();
 articlesRouter.get('/', articlesController.getAllArticles)
 articlesRouter.get('/:id', articlesController.getById)
 articlesRouter.post('/', authenticateJWT, articlesController.postArticle)
-articlesRouter.put('/:id', authenticateJWT, articlesController.putArticle)
+articlesRouter.patch('/:id', authenticateJWT, articlesController.patchArticle)
 articlesRouter.delete('/:id', authenticateJWT, articlesController.deleteArticle)
