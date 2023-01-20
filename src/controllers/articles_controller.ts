@@ -1,5 +1,7 @@
 import express = require('express');
+import { EStatus } from '../constant/const';
 import { ArticlesService } from '../services/articles_services';
+import { TApiResponse } from '../types/types';
 
 const articlesService = new ArticlesService();
 
@@ -9,46 +11,66 @@ export class ArticlesController {
         try {
             const articles = await articlesService.getArticles();
             if (articles) {
-                res.status(200).json({
-                    status: "success",
-                    data: articles
-                })
+                const response: TApiResponse = {
+                    status: EStatus.OK,
+                    data: articles,
+                    message: "Article(s) loaded"
+                }
+                res.status(200).json(response)
                 return;
             }
-            res.status(404).json({
-                status: "fail",
-                message: "there's no article"
-            })
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "No article to load"
+            }
+            res.status(404).json(response)
         }
         catch (err) {
-            res.status(500).json({ status: "fail", data: "Erreur serveur" })
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "Server error"
+            }
+            res.status(500).json(response)
         }
     }
     async getById(req: express.Request, res: express.Response){
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
-            res.status(406).json({
-                status: "fail",
-                message: "Id must be an integer"
-            })
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "Param Id uncorrect"
+            }
+            res.status(406).json(response)
             return;
         }
         try {
             const article = await articlesService.getById(id);
             if (article) {
-                res.status(200).json({
-                    status: "success",
-                    data: article
-                })
+                const response: TApiResponse = {
+                    status: EStatus.OK,
+                    data: article,
+                    message: "Article loaded"
+                }
+                res.status(200).json(response)
                 return;
             }
-            res.status(404).json({
-                status: "fail",
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
                 message: "Article not found"
-            })
+            }
+            res.status(404).json(response)
         }
         catch (err) {
-            res.status(500).json({ status: "fail", data: "Erreur serveur" })
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "Server error"
+            }
+            res.status(500).json(response)
         }
     }
     async postArticle(req: express.Request, res: express.Response){
@@ -56,25 +78,30 @@ export class ArticlesController {
         const userId=req.user?.userId;
 
         if (message.length == 0) {
-            res.status(412).json({
-                status: "fail",
-                data: "Article vide"
-            })
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "Article can't be empty"
+            }
+            res.status(412).json(response)
             return;
         }
         try {
             const article = await articlesService.addArticle(message, userId);
-            res.status(201).json({
-                status: "success",
-                data: article
-            })
+            const response: TApiResponse = {
+                status: EStatus.OK,
+                data: article,
+                message: "Article posted"
+            }
+            res.status(201).json(response)
         }
-    
         catch (err) {
-            res.status(500).json({
-                status: "fail",
-                data: "Erreur serveur"
-            })
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "Server Error"
+            }
+            res.status(500).json(response)
         }
     }
     async patchArticle(req: express.Request, res: express.Response){
@@ -83,40 +110,50 @@ export class ArticlesController {
         const userId = req.user?.userId;
 
         if (isNaN(articleId)) {
-            res.status(412).json({
-                status: "fail",
-                message: "Id article non valide"
-            })
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "Unvalid article Id"
+            }
+            res.status(412).json(response)
             return;
         }
-        const articleProperty = await articlesService.articleCreatedBy(articleId);
+        const StoredArticle = await articlesService.getById(articleId);
         
-        if (userId!=articleProperty) {
-            res.status(401).json({
-                status: "fail",
-                message: "Article n'appartient pas à ce user"
-            })
+        if (userId!=StoredArticle.id_user) {
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "User can't modify this article"
+            }
+            res.status(401).json(response)
             return;
         }
         if (message.length == 0) {
-            res.status(412).json({
-                status: "fail",
-                message: "Article vide"
-            })
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "Article can't be empty"
+            }
+            res.status(412).json(response)
             return;
         }
-        
         try {
             const article = await articlesService.modifyArticle(articleId, message);
-            
-            res.status(202).json({
-                status: "success",
-                data: article
-            })
+            const response: TApiResponse = {
+                status: EStatus.OK,
+                data: null,
+                message: "Article modified"
+            }
+            res.status(202).json(response)
         }
-    
         catch (err) {
-            res.status(500).json({ status: "fail", data: "Erreur serveur" })
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "Server error"
+            }
+            res.status(500).json(response)
         }
     
     }
@@ -125,30 +162,40 @@ export class ArticlesController {
         const userId = req.user?.userId;
 
         if (isNaN(articleId)) {
-            res.status(412).json({
-                status: "fail",
-                data: "Id article non valide"
-            })
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "Unvalid article ID"
+            }
+            res.status(412).json(response)
             return;
         }
-        const articleProperty = await articlesService.articleCreatedBy(articleId);
-        if (userId!=articleProperty) {
-            res.status(401).json({
-                status: "fail",
-                data: "Article n'appartient pas à ce user"
-            })
+        const articleProperty = await articlesService.getById(articleId);
+        if (userId!=articleProperty.id_user) {
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "User can't delete this article"
+            }
+            res.status(401).json(response)
             return;
         }
-
         try {
             const article = await articlesService.deleteArticle(userId);
-            res.status(202).json({
-                status: "success",
-                data: article
-            })
+            const response: TApiResponse = {
+                status: EStatus.OK,
+                data: article,
+                message: "Article deleted"
+            }
+            res.status(202).json(response)
         }
         catch (err) {
-            res.status(500).json({ status: "fail", data: "Erreur serveur" })
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "Server Error"
+            }
+            res.status(500).json(response)
         }
     }
 }

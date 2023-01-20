@@ -46,13 +46,4 @@ export class ArticlesService{
         }
         return undefined
     }
-    async articleCreatedBy(id: number)
-    {
-        const data = await client.query('SELECT created_by FROM articles WHERE id=$1', [id]);
-        if(data.rowCount)
-        {
-            return data.rows[0].created_by;
-        }
-        return undefined
-    }
 }

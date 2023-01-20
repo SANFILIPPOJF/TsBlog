@@ -5,6 +5,8 @@ import { JwtPayload } from 'jsonwebtoken';
 import { usersRouter } from './routes/users_router';
 import { articlesRouter } from './routes/articles_router';
 import { commentsRouter } from './routes/comments_router';
+import { TApiResponse } from './types/types';
+import { EStatus } from './constant/const';
 
 declare global
 {
@@ -55,10 +57,18 @@ app.use(function (req: express.Request, res: express.Response, next)
 /************************************************
    * Add the route here
    */
-
 app.use('/api/users', usersRouter);
 app.use('/api/articles', articlesRouter);
 app.use('/api/comments', commentsRouter);
+app.use((req, res, next) => {
+    const response: TApiResponse = {
+        status: EStatus.FAIL,
+        data: null,
+        message: "Uncorrect route"
+    }
+    res.status(404).json(response)
+
+})
 
 // Bind express server on port 8080
 app.listen(port, () =>

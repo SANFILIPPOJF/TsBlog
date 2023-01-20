@@ -2,6 +2,8 @@ import * as bcrypt from 'bcrypt';
 import express = require('express');
 import { UsersService } from '../services/users_services';
 import jwt = require('jsonwebtoken');
+import { TApiResponse } from '../types/types';
+import { EStatus } from '../constant/const';
 
 const usersService = new UsersService();
 const accessTokenSecret = process.env.TOKEN_SECRET!;
@@ -14,36 +16,39 @@ export class UsersController {
         try {
             const userExist = await usersService.getUserByName(name);
             if (userExist) {
-                res.status(406).json(
-                    {
-                        status: "not acceptable",
-                        message: "Username allready exist",
-                    }
-                )
+                const response: TApiResponse = {
+                    status: EStatus.FAIL,
+                    data: null,
+                    message: "Username allready exist"
+                }
+                res.status(406).json(response)
                 return;
             }
             bcrypt.hash(pass, 10, async function (err, hash) {
                 try {
                     const data = await usersService.addUser(name, hash);
-
-                    res.status(201).json(
-                        {
-                            status: "success",
-                            message: "User registered",
-                            username: data.name
-                        }
-                    )
+                    const response: TApiResponse = {
+                        status: EStatus.OK,
+                        data: data.name,
+                        message: "User registered"
+                    }
+                    res.status(201).json(response)
                 } catch (err) {
-                    res.status(500).json(
-                        {
-                            status: "fail",
-                            message: "erreur serveur"
-                        }
-                    )
+                    const response: TApiResponse = {
+                        status: EStatus.FAIL,
+                        data: null,
+                        message: "Server error"
+                    }
+                    res.status(500).json(response)
                 }
             });
         } catch (error) {
-            res.status(500).json({ status: "fail", message: "Erreur serveur" })
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "Server Error"
+            }
+            res.status(500).json(response)
         }
 
     }
@@ -54,32 +59,40 @@ export class UsersController {
         try {
             const userExist = await usersService.getUserByName(name);
             if (!userExist) {
-                res.status(404).json(
-                    {
-                        status: "fail",
-                        message: "User unknown",
-                    }
-                )
+                const response: TApiResponse = {
+                    status: EStatus.FAIL,
+                    data: null,
+                    message: "User unknown"
+                }
+                res.status(404).json(response)
                 return;
             }
             bcrypt.compare(password, userExist.password, function (err, result) {
                 if (result) {
                     const accessToken = jwt.sign({ userId: userExist.id }, accessTokenSecret);
-                    res.status(202).json({
-                        status: "OK",
+                    const response: TApiResponse = {
+                        status: EStatus.OK,
                         data: accessToken,
-                        message: 'logged in'
-                    })
+                        message: "Logged in"
+                    }
+                    res.status(202).json(response)
                     return;
                 }
-                res.status(401).json({
-                    status: "fail",
-                    message: "uncorrect password"
-                })
+                const response: TApiResponse = {
+                    status: EStatus.FAIL,
+                    data: null,
+                    message: "Uncorrect password"
+                }
+                res.status(401).json(response)
             })
 
         } catch (error) {
-            res.status(500).json({ status: "fail", data: "Erreur serveur" })
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "Server error"
+            }
+            res.status(500).json(response)
         }
     }
 }
