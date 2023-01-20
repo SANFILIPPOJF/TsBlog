@@ -7,7 +7,7 @@ const articlesService = new ArticlesService();
 
 export class ArticlesController {
 
-    async getAllArticles(req: express.Request, res: express.Response){
+    async getAllArticles(req: express.Request, res: express.Response) {
         try {
             const articles = await articlesService.getArticles();
             if (articles) {
@@ -35,7 +35,7 @@ export class ArticlesController {
             res.status(500).json(response)
         }
     }
-    async getById(req: express.Request, res: express.Response){
+    async getById(req: express.Request, res: express.Response) {
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
             const response: TApiResponse = {
@@ -43,7 +43,7 @@ export class ArticlesController {
                 data: null,
                 message: "Param Id uncorrect"
             }
-            res.status(406).json(response)
+            res.status(400).json(response)
             return;
         }
         try {
@@ -73,17 +73,17 @@ export class ArticlesController {
             res.status(500).json(response)
         }
     }
-    async postArticle(req: express.Request, res: express.Response){
+    async postArticle(req: express.Request, res: express.Response) {
         const message = req.body.message;
-        const userId=req.user?.userId;
+        const userId = req.user?.userId;
 
-        if (message.length == 0) {
+        if (!message) {
             const response: TApiResponse = {
                 status: EStatus.FAIL,
                 data: null,
                 message: "Article can't be empty"
             }
-            res.status(412).json(response)
+            res.status(400).json(response)
             return;
         }
         try {
@@ -104,7 +104,7 @@ export class ArticlesController {
             res.status(500).json(response)
         }
     }
-    async patchArticle(req: express.Request, res: express.Response){
+    async patchArticle(req: express.Request, res: express.Response) {
         const articleId = parseInt(req.params.id);
         const message = req.body.message;
         const userId = req.user?.userId;
@@ -115,37 +115,38 @@ export class ArticlesController {
                 data: null,
                 message: "Unvalid article Id"
             }
-            res.status(412).json(response)
-            return;
-        }
-        const StoredArticle = await articlesService.getById(articleId);
-        
-        if (userId!=StoredArticle.id_user) {
-            const response: TApiResponse = {
-                status: EStatus.FAIL,
-                data: null,
-                message: "User can't modify this article"
-            }
-            res.status(401).json(response)
-            return;
-        }
-        if (message.length == 0) {
-            const response: TApiResponse = {
-                status: EStatus.FAIL,
-                data: null,
-                message: "Article can't be empty"
-            }
-            res.status(412).json(response)
+            res.status(400).json(response)
             return;
         }
         try {
+            const StoredArticle = await articlesService.getById(articleId);
+
+            if (userId != StoredArticle.id_user) {
+                const response: TApiResponse = {
+                    status: EStatus.FAIL,
+                    data: null,
+                    message: "User can't modify this article"
+                }
+                res.status(401).json(response)
+                return;
+            }
+            if (message.length == 0) {
+                const response: TApiResponse = {
+                    status: EStatus.FAIL,
+                    data: null,
+                    message: "Article can't be empty"
+                }
+                res.status(404).json(response)
+                return;
+            }
+
             const article = await articlesService.modifyArticle(articleId, message);
             const response: TApiResponse = {
                 status: EStatus.OK,
                 data: null,
                 message: "Article modified"
             }
-            res.status(202).json(response)
+            res.status(200).json(response)
         }
         catch (err) {
             const response: TApiResponse = {
@@ -155,9 +156,9 @@ export class ArticlesController {
             }
             res.status(500).json(response)
         }
-    
+
     }
-    async deleteArticle(req: express.Request, res: express.Response){
+    async deleteArticle(req: express.Request, res: express.Response) {
         const articleId = parseInt(req.params.id);
         const userId = req.user?.userId;
 
@@ -167,11 +168,11 @@ export class ArticlesController {
                 data: null,
                 message: "Unvalid article ID"
             }
-            res.status(412).json(response)
+            res.status(400).json(response)
             return;
         }
         const articleProperty = await articlesService.getById(articleId);
-        if (userId!=articleProperty.id_user) {
+        if (userId != articleProperty.id_user) {
             const response: TApiResponse = {
                 status: EStatus.FAIL,
                 data: null,
@@ -187,7 +188,7 @@ export class ArticlesController {
                 data: article,
                 message: "Article deleted"
             }
-            res.status(202).json(response)
+            res.status(200).json(response)
         }
         catch (err) {
             const response: TApiResponse = {

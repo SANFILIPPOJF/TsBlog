@@ -13,9 +13,9 @@ export class CommentsController {
             const response: TApiResponse = {
                 status: EStatus.FAIL,
                 data: null,
-                message: "Uncorrect article Id"
+                message: "Unvalid article Id"
             }
-            res.status(406).json(response)
+            res.status(400).json(response)
             return;
         }
         try {
@@ -66,13 +66,14 @@ export class CommentsController {
     async addComment(req: express.Request, res: express.Response) {
         const { articleId, comment } = req.body;
         const userId=req.user?.userId;
+
         if (isNaN(articleId)) {
             const response: TApiResponse = {
                 status: EStatus.FAIL,
                 data: null,
                 message: "Unvalid article Id"
             }
-            res.status(406).json(response)
+            res.status(400).json(response)
             return;
         }
         if (!comment) {
@@ -81,7 +82,7 @@ export class CommentsController {
                 data: null,
                 message: "Comment can't be empty"
             }
-            res.status(411).json(response)
+            res.status(400).json(response)
             return;
         }
         try {
@@ -126,13 +127,14 @@ export class CommentsController {
         const comment = req.body.comment;
         const commentId = parseInt(req.params.id);
         const userId=req.user?.userId;
+
         if (isNaN(commentId)) {
             const response: TApiResponse = {
                 status: EStatus.FAIL,
                 data: null,
                 message: "Unvalid comment Id"
             }
-            res.status(406).json(response)
+            res.status(400).json(response)
             return;
         }
         if (!comment) {
@@ -141,7 +143,7 @@ export class CommentsController {
                 data: null,
                 message: "Comment can't be empty"
             }
-            res.status(411).json(response)
+            res.status(400).json(response)
             return;
         }
         try {
@@ -152,7 +154,7 @@ export class CommentsController {
                     data: null,
                     message: "Comment not found"
                 }
-                res.status(200).json(response)
+                res.status(404).json(response)
                 return;
             }
             if (userId!=storedComment.id_user) {
@@ -170,7 +172,7 @@ export class CommentsController {
                     data: null,
                     message: "Impossible to modify a deleted comment"
                 }
-                res.status(403).json(response)
+                res.status(401).json(response)
                 return;
             }
             const articleExist = await articlesService.getById(storedComment.id_article);
@@ -189,7 +191,7 @@ export class CommentsController {
                     data: null,
                     message: "Article deleted, impossible to modify comment"
                 }
-                res.status(403).json(response)
+                res.status(401).json(response)
                 return;
             }
             const newComment = await commentsService.modifyComment(commentId,comment);
@@ -212,13 +214,14 @@ export class CommentsController {
     async deleteComment(req: express.Request, res: express.Response) {
         const commentId = parseInt(req.params.id);
         const userId=req.user?.userId;
+
         if (isNaN(commentId)) {
             const response: TApiResponse = {
                 status: EStatus.FAIL,
                 data: null,
                 message: "Unvalid Comment Id"
             }
-            res.status(406).json(response)
+            res.status(400).json(response)
             return;
         }
         try {
@@ -238,7 +241,7 @@ export class CommentsController {
                     data: null,
                     message: "User not authorized to deleted this comment"
                 }
-                res.status(401).json(response)
+                res.status(403).json(response)
                 return;
             }
             if (storedComment.deleted_at) {
@@ -247,7 +250,7 @@ export class CommentsController {
                     data: null,
                     message: "Comment already deleted"
                 }
-                res.status(403).json(response)
+                res.status(401).json(response)
                 return;
             }
             const articleExist = await articlesService.getById(storedComment.id_article);
@@ -266,7 +269,7 @@ export class CommentsController {
                     data: null,
                     message: "Article already deleted, impossible to delete comment"
                 }
-                res.status(403).json(response)
+                res.status(401).json(response)
                 return;
             }
             const deletedComment = await commentsService.deleteComment(commentId);

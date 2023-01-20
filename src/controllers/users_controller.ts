@@ -11,8 +11,23 @@ const accessTokenSecret = process.env.TOKEN_SECRET!;
 export class UsersController {
     async register(req: express.Request, res: express.Response) {
         const name: string = req.body.name;
-        const pass: string = req.body.password;
-
+        const password: string = req.body.password;
+        if (!name) {
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "Username can't be empty"
+            }
+            res.status(404).json(response)
+        }
+        if (!password) {
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "Password can't be empty"
+            }
+            res.status(404).json(response)
+        }
         try {
             const userExist = await usersService.getUserByName(name);
             if (userExist) {
@@ -21,10 +36,10 @@ export class UsersController {
                     data: null,
                     message: "Username allready exist"
                 }
-                res.status(406).json(response)
+                res.status(400).json(response)
                 return;
             }
-            bcrypt.hash(pass, 10, async function (err, hash) {
+            bcrypt.hash(password, 10, async function (err, hash) {
                 try {
                     const data = await usersService.addUser(name, hash);
                     const response: TApiResponse = {
@@ -56,6 +71,22 @@ export class UsersController {
     async login(req: express.Request, res: express.Response) {
         const password = req.body.password;
         const name = req.body.name;
+        if (!name) {
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "Username can't be empty"
+            }
+            res.status(404).json(response)
+        }
+        if (!password) {
+            const response: TApiResponse = {
+                status: EStatus.FAIL,
+                data: null,
+                message: "Password can't be empty"
+            }
+            res.status(404).json(response)
+        }
         try {
             const userExist = await usersService.getUserByName(name);
             if (!userExist) {

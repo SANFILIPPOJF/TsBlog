@@ -1,5 +1,7 @@
 import jwt = require('jsonwebtoken');
 import express = require('express');
+import { TApiResponse } from '../types/types';
+import { EStatus } from '../constant/const';
 
 const accessTokenSecret = process.env.TOKEN_SECRET!;
 
@@ -11,7 +13,13 @@ export const authenticateJWT = (req: express.Request, res: express.Response, nex
 
         jwt.verify(token, accessTokenSecret, (err, token) => {
             if (err) {
-                return res.sendStatus(403);
+                const response: TApiResponse = {
+                    status: EStatus.OK,
+                    data: null,
+                    message: "User must be logged in"
+                }
+                res.status(403).json(response)
+                return;
             }
 
             if (token) {
@@ -21,6 +29,11 @@ export const authenticateJWT = (req: express.Request, res: express.Response, nex
 
         });
     } else {
-        res.sendStatus(401);
+        const response: TApiResponse = {
+            status: EStatus.FAIL,
+            data: null,
+            message: "Athentication error"
+        }
+        res.status(401).json(response)
     }
 };
