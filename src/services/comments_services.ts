@@ -3,7 +3,7 @@ import { client } from "../client";
 export class CommentsService{
     async getCommentsFromArticle(articleId: number)
     {
-        const data = await client.query('SELECT * FROM comments WHERE id_article = $1', [articleId]);
+        const data = await client.query('SELECT * FROM comments WHERE id_article = $1 AND deleted_at = null', [articleId]);
         if(data.rowCount)
         {
             return data.rows;

@@ -3,12 +3,12 @@ import { client } from "../client";
 export class ArticlesService{
     async getArticles()
     {
-        const data = await client.query('SELECT * FROM articles');
+        const data = await client.query('SELECT * FROM articles WHERE deleted_at = null');
         if(data.rowCount)
         {
             return data.rows;
         }
-        return undefined
+        return
     }
     async getById(id: number)
     {
