@@ -4,9 +4,11 @@ import { ArticlesService } from '../services/articles_services';
 import { TApiResponse } from '../types/types';
 
 const articlesService = new ArticlesService();
-
+/**
+ * Class des differents controleurs pour les articles
+ */
 export class ArticlesController {
-
+    
     async getAllArticles(req: express.Request, res: express.Response) {
         try {
             const articles = await articlesService.getArticles();
